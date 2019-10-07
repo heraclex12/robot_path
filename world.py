@@ -3,6 +3,7 @@ from CSTTNT.robot_path.robot import Robot
 # Quy ước:
 #            # : hình đa giác
 #            0 : vị trí trống
+#            + : lộ trình đường đi
 #            S : vị trí bắt đầu
 #            G : vị trí kết thúc
 #            * : viền/khung/giới hạn/ranh giới
@@ -32,7 +33,7 @@ class World():
 
             line = file.readline()
             p1, p2, p3, p4 = [int(i) for i in line.split(",")]
-            # self.robot = Robot(p1, p2, p3, p4)
+            self.robot = Robot(p2, p1, p4, p3)
             self.area[p2][p1] = "S"
             self.area[p4][p3] = "G"
             self.amount_polygan = int(file.readline())
@@ -46,12 +47,11 @@ class World():
                 self.polygans.append(polygan)
 
 
-
+    def eucliean_distance(self, x1, y1, x2, y2):
+        return (((x2 - x1) ** 2) + ((y2 - y1) ** 2)) ** 0.5
 
 
     def drawing_polygan(self, polygan : list):
-        def distance_points(x1, y1, x2, y2):
-            return (((x2 - x1) ** 2) + ((y2 - y1) ** 2)) ** 0.5
 
         def match_two_point(point_a : tuple, point_b : tuple):
             if point_a[0] == point_b[0]:
@@ -86,7 +86,7 @@ class World():
                                 break
 
                             if self.area[x_next + position[0]][y_next + position[1]] == 0:
-                                path_weight = round(distance_points(x_next + position[0], y_next + position[1], point_b[0], point_b[1]), 2)
+                                path_weight = round(self.eucliean_distance(x_next + position[0], y_next + position[1], point_b[0], point_b[1]), 2)
                                 if position[0] == 0 or position[1] == 0:
                                     path_weight += 1
 
@@ -114,6 +114,45 @@ class World():
         match_two_point(polygan[0], polygan[len(polygan) - 1])
 
 
+    def a_star_search(self):
+        positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
+        start_point = self.robot.get_start_point()
+        end_point = self.robot.get_end_point()
+        x_next = start_point[0]
+        y_next = start_point[1]
+        while not (x_next == end_point[0] and y_next == end_point[1]):
+            minimum = self.leng * self.width
+            x_tmp = x_next
+            y_tmp = y_next
+            for position in positions:
+                if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
+                    if x_next + position[0] == end_point[0] and y_next + position[1] == end_point[1]:
+                        x_tmp = end_point[0]
+                        y_tmp = end_point[1]
+                        break
+
+                    if self.area[x_next + position[0]][y_next + position[1]] == 0:
+                        path_weight = round(
+                            self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0], end_point[1]),
+                            2)
+                        if position[0] == 0 or position[1] == 0:
+                            path_weight += 1
+
+                        else:
+                            if self.area[x_next][y_next + position[1]] != 0 and self.area[x_next + position[0]][y_next] != 0:
+                                continue
+
+                            path_weight += 1.50
+
+                        if path_weight < minimum:
+                            minimum = path_weight
+                            x_tmp = x_next + position[0]
+                            y_tmp = y_next + position[1]
+
+            x_next = x_tmp
+            y_next = y_tmp
+            if self.area[x_next][y_next] != "G":
+                self.area[x_next][y_next] = "+"
 
     def write_output(self):
         pass
@@ -129,4 +168,6 @@ world = World()
 world.read_input()
 for i in world.polygans:
     world.drawing_polygan(i)
+
+world.a_star_search()
 world.print_area()

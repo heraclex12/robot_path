@@ -6,4 +6,7 @@ class Robot():
         self.end = (e_a, e_b)
 
     def get_start_point(self):
-        print(self.start)
+        return self.start
+
+    def get_end_point(self):
+        return self.end
