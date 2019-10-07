@@ -45,7 +45,14 @@ class World():
 
                 self.polygans.append(polygan)
 
+
+
+
+
     def drawing_polygan(self, polygan : list):
+        def distance_points(x1, y1, x2, y2):
+            return (((x2 - x1) ** 2) + ((y2 - y1) ** 2)) ** 0.5
+
         def match_two_point(point_a : tuple, point_b : tuple):
             if point_a[0] == point_b[0]:
                 for match in range(0, abs(point_a[1] - point_b[1]) + 1):
@@ -62,6 +69,40 @@ class World():
 
                     else:
                         self.area[point_b[0] + match][point_b[1]] = "#"
+
+            else:
+                positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
+                x_next = point_a[0]
+                y_next = point_a[1]
+                while not (x_next == point_b[0] and y_next == point_b[1]):
+                    minimum = self.leng * self.width
+                    x_tmp = x_next
+                    y_tmp = y_next
+                    for position in positions:
+                        if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
+                            if x_next + position[0] == point_b[0] and y_next + position[1] == point_b[1]:
+                                x_tmp = point_b[0]
+                                y_tmp = point_b[1]
+                                break
+
+                            if self.area[x_next + position[0]][y_next + position[1]] == 0:
+                                path_weight = round(distance_points(x_next + position[0], y_next + position[1], point_b[0], point_b[1]), 2)
+                                if position[0] == 0 or position[1] == 0:
+                                    path_weight += 1
+
+                                else:
+                                    path_weight += 1.50
+
+                                if path_weight < minimum:
+                                    minimum = path_weight
+                                    x_tmp = x_next + position[0]
+                                    y_tmp = y_next + position[1]
+
+                    x_next = x_tmp
+                    y_next = y_tmp
+                    self.area[x_next][y_next] = "#"
+
+
             
 
         self.area[polygan[0][0]][polygan[0][1]] = "#"
@@ -70,7 +111,7 @@ class World():
             prev = polygan[index - 1]
             match_two_point(curr, prev)
 
-        match_two_point(polygan[len(polygan) - 1], polygan[0])
+        match_two_point(polygan[0], polygan[len(polygan) - 1])
 
 
 
@@ -86,5 +127,6 @@ class World():
 
 world = World()
 world.read_input()
-world.drawing_polygan(world.polygans[2])
+for i in world.polygans:
+    world.drawing_polygan(i)
 world.print_area()
