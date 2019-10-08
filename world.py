@@ -16,10 +16,12 @@ class World():
         self.polygans = []
         self.area = []
         self.robot = Robot(0,0,0,0)
+        self.amount_stop = 0
+        self.stops = []
 
     def read_input(self):
         with open("input.txt", "r") as file:
-            line = file.readline()
+            line = file.readline().strip("\s\n\r\t")
             self.leng, self.width = [int(i) + 1 for i in line.split(",")]
             for i in range(self.width):
                 row = []
@@ -31,20 +33,30 @@ class World():
 
                 self.area.append(row)
 
-            line = file.readline()
+            line = file.readline().strip("\s\n\r\t")
             p1, p2, p3, p4 = [int(i) for i in line.split(",")]
             self.robot = Robot(p2, p1, p4, p3)
             self.area[p2][p1] = "S"
             self.area[p4][p3] = "G"
-            self.amount_polygan = int(file.readline())
-            for i in range(self.amount_polygan):
-                polygan = []
-                line = file.readline()
+            self.amount_polygan = file.readline().strip("\s\n\r\t")
+            if self.amount_polygan is not None:
+                self.amount_polygan = int(self.amount_polygan)
+                for i in range(self.amount_polygan):
+                    polygan = []
+                    line = file.readline().strip("\s\n\r\t")
+                    tmp = [int(i) for i in line.split(",")]
+                    for j in range(0, len(tmp), 2):
+                        polygan.append((tmp[j + 1], tmp[j]))
+
+                    self.polygans.append(polygan)
+
+            line = file.readline().strip("\s\n\r\t")
+            if line is not None:
                 tmp = [int(i) for i in line.split(",")]
                 for j in range(0, len(tmp), 2):
-                    polygan.append((tmp[j + 1], tmp[j]))
+                    self.area[tmp[j + 1]][tmp[j]] = "P"
+                    self.stops.append((tmp[j + 1], tmp[j]))
 
-                self.polygans.append(polygan)
 
 
     def eucliean_distance(self, x1, y1, x2, y2):
@@ -109,7 +121,7 @@ class World():
         for index in range(1, len(polygan)):
             curr = polygan[index]
             prev = polygan[index - 1]
-            match_two_point(curr, prev)
+            match_two_point(prev, curr)
 
         match_two_point(polygan[0], polygan[len(polygan) - 1])
 
@@ -117,42 +129,56 @@ class World():
     def a_star_search(self):
         positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
         start_point = self.robot.get_start_point()
-        end_point = self.robot.get_end_point()
-        x_next = start_point[0]
-        y_next = start_point[1]
-        while not (x_next == end_point[0] and y_next == end_point[1]):
+        passing_points = []
+        passing_points.extend(self.stops)
+        passing_points.append(self.robot.get_end_point())
+        while passing_points:
             minimum = self.leng * self.width
-            x_tmp = x_next
-            y_tmp = y_next
-            for position in positions:
-                if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
-                    if x_next + position[0] == end_point[0] and y_next + position[1] == end_point[1]:
-                        x_tmp = end_point[0]
-                        y_tmp = end_point[1]
-                        break
+            stop_index = 0
+            for point_index in range(len(passing_points) - 1):
+                path_weight = round(self.eucliean_distance(start_point[0], start_point[1], passing_points[point_index][0], passing_points[point_index][1]), 2)
+                if path_weight < minimum:
+                    minimum = path_weight
+                    stop_index = point_index
 
-                    if self.area[x_next + position[0]][y_next + position[1]] == 0:
-                        path_weight = round(
-                            self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0], end_point[1]),
-                            2)
-                        if position[0] == 0 or position[1] == 0:
-                            path_weight += 1
+            end_point = passing_points.pop(stop_index)
+            x_next = start_point[0]
+            y_next = start_point[1]
+            while not (x_next == end_point[0] and y_next == end_point[1]):
+                minimum = self.leng * self.width
+                x_tmp = x_next
+                y_tmp = y_next
+                for position in positions:
+                    if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
+                        if x_next + position[0] == end_point[0] and y_next + position[1] == end_point[1]:
+                            x_tmp = end_point[0]
+                            y_tmp = end_point[1]
+                            break
 
-                        else:
-                            if self.area[x_next][y_next + position[1]] != 0 and self.area[x_next + position[0]][y_next] != 0:
-                                continue
+                        if self.area[x_next + position[0]][y_next + position[1]] == 0:
+                            path_weight = round(
+                                self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0], end_point[1]),
+                                2)
+                            if position[0] == 0 or position[1] == 0:
+                                path_weight += 1
 
-                            path_weight += 1.50
+                            else:
+                                if self.area[x_next][y_next + position[1]] != 0 and self.area[x_next + position[0]][y_next] != 0:
+                                    continue
 
-                        if path_weight < minimum:
-                            minimum = path_weight
-                            x_tmp = x_next + position[0]
-                            y_tmp = y_next + position[1]
+                                path_weight += 1.50
 
-            x_next = x_tmp
-            y_next = y_tmp
-            if self.area[x_next][y_next] != "G":
-                self.area[x_next][y_next] = "+"
+                            if path_weight < minimum:
+                                minimum = path_weight
+                                x_tmp = x_next + position[0]
+                                y_tmp = y_next + position[1]
+
+                x_next = x_tmp
+                y_next = y_tmp
+                if self.area[x_next][y_next] != "G" and self.area[x_next][y_next] != "P":
+                    self.area[x_next][y_next] = "+"
+
+                start_point = end_point
 
     def write_output(self):
         pass
