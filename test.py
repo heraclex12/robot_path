@@ -1,14 +1,11 @@
 from graphics import *
 ratio=30
-win=GraphWin("Mywd",23*ratio,19*ratio)
-poly=Polygon(Point(4*10,18*10-4*10),Point(5*30,18*30-9*30),Point(8*30,18*30-10*30),Point(9*30,18*30-5*30))
-poly.setFill(color_rgb(255,0,255))
-
-line=Line(Point(14*30,18*30-1*30),Point(11*30,18*30-1*30))
-line.setFill(color_rgb(0,255,255))
-
-
-poly2=Polygon(Point(8*30,18*30-12*30),Point(8*30,18*30-17*30),Point(13*30,18*30-12*30))
+win=GraphWin("robot_path",23*ratio,19*ratio)
+#poly=Polygon(Point(4*10,18*10-4*10),Point(5*30,18*30-9*30),Point(8*30,18*30-10*30),Point(9*30,18*30-5*30))
+#poly.setFill(color_rgb(255,0,255))
+#line=Line(Point(14*30,18*30-1*30),Point(11*30,18*30-1*30))
+#line.setFill(color_rgb(0,255,255))
+#poly2=Polygon(Point(8*30,18*30-12*30),Point(8*30,18*30-17*30),Point(13*30,18*30-12*30))
 list1=[8,12,8,17,13,12]
 list2=[11,1,11,6,14,6,14,1]
 list3=[4,4,5,9,8,10,9,5]
@@ -47,14 +44,14 @@ def drawPolygan(list):
     line = Line(Point(list[len(list) - 2] * ratio, 18 * ratio - list[len(list) - 1] * ratio),Point(list[0] * ratio, 18 * ratio - list[1] * ratio))
     line.setWidth(ratio)
 
-x=1-0.5
-y=1-0.5
+#x=1-0.5
+#y=1-0.5
 
-x2=2-0.5
-y2=1-0.5
-txt=Text(Point(ratio*x,18*ratio-y*ratio),"x")
+#x2=2-0.5
+#y2=1-0.5
+#txt=Text(Point(ratio*x,18*ratio-y*ratio),"x")
 
-txt=Text(Point(ratio*x2,18*ratio-y2*ratio),"x")
+#txt=Text(Point(ratio*x2,18*ratio-y2*ratio),"x")
 
 a=[]
 for i in range(23):
@@ -102,16 +99,16 @@ txt.draw(win)
 
 
 
-squ=Rectangle(Point(ratio*(x-0.5),18*ratio-(y-0.5)*ratio),Point(ratio*(x+0.5),18*ratio-(y+0.5)*ratio))
+#squ=Rectangle(Point(ratio*(x-0.5),18*ratio-(y-0.5)*ratio),Point(ratio*(x+0.5),18*ratio-(y+0.5)*ratio))
 
 
-squ=Rectangle(Point(ratio*(x2-0.5),18*ratio-(y2-0.5)*ratio),Point(ratio*(x2+0.5),18*ratio-(y2+0.5)*ratio))
+#squ=Rectangle(Point(ratio*(x2-0.5),18*ratio-(y2-0.5)*ratio),Point(ratio*(x2+0.5),18*ratio-(y2+0.5)*ratio))
 
 
 
-img=Image(Point(ratio*10,ratio*11),"\Hpzdi9q.gif")
+#img=Image(Point(ratio*10,ratio*11),"\Hpzdi9q.gif")
 
-img=Image(Point(ratio*15,ratio*11),"\Hpzdi9q.gif")
+#img=Image(Point(ratio*15,ratio*11),"\Hpzdi9q.gif")
 
 
 
