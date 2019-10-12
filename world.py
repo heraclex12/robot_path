@@ -1,6 +1,7 @@
-from CSTTNT.robot_path.robot import Robot
+from robot import Robot
 import copy
-
+from draw import *
+from graphics import *
 # Quy ước:
 #            # : hình đa giác
 #            0 : vị trí trống
@@ -246,7 +247,6 @@ class World():
                     self.area[end_point[0]][end_point[1]] = "+"
 
                 break
-
         return robot_path
 
 
@@ -268,5 +268,27 @@ for i in world.polygans:
     world.drawing_polygan(i)
 
 # world.greedy_search()
-world.dijkstra_search()
+path=world.dijkstra_search()
 world.print_area()
+
+motchieu=rvto1d(path)
+oldpath=[2,2,3,3,4,3,5,3,6,3,7,3,8,3,9,4,10,5,10,6,10,7,11,8,12,9,13,10,14,11,15,12,16,13,17,14,18,15,19,16]
+plg1=[4,4,4,5,4,6,4,7,4,8,5,9,6,9,7,10,8,10,9,9,9,8,9,7,9,6,9,5,8,5,8,5,7,4,6,4,5,4,8,4]
+plg2=[11,1,11,2,11,3,11,4,11,5,11,6,11,6,12,6,13,6,14,6,14,5,14,4,14,3,14,2,14,1,13,1,12,1]
+plg3=[8,12,8,13,8,14,8,15,8,16,8,17,9,16,10,15,11,14,12,13,13,12,12,12,11,12,10,12,9,12,8,12]
+
+width=22
+height=18
+ratio=30
+
+win=GraphWin("robot_path",(width+1)*ratio,(height+1)*ratio)
+drawGrid(width,height,win)
+drawPath(oldpath,color_rgb(150,150,150),win,height)
+drawPath(plg1,color_rgb(255,0,0),win,height)
+drawPath(plg2,color_rgb(0,255,0),win,height)
+drawPath(plg3,color_rgb(220,116,0),win,height)
+drawPath(motchieu,color_rgb(100,100,100),win,height)
+drawText(2,2,height,win,"S",20)
+drawText(19,16,height,win,"G",20)
+win.getMouse()
+win.close()
