@@ -1,4 +1,5 @@
 from CSTTNT.robot_path.robot import Robot
+import copy
 
 # Quy ước:
 #            # : hình đa giác
@@ -6,6 +7,7 @@ from CSTTNT.robot_path.robot import Robot
 #            + : lộ trình đường đi
 #            S : vị trí bắt đầu
 #            G : vị trí kết thúc
+#            P : vị trí các điểm đón
 #            * : viền/khung/giới hạn/ranh giới
 
 class World():
@@ -36,10 +38,8 @@ class World():
             line = file.readline().strip("\s\n\r\t")
             p1, p2, p3, p4 = [int(i) for i in line.split(",")]
             self.robot = Robot(p2, p1, p4, p3)
-            self.area[p2][p1] = "S"
-            self.area[p4][p3] = "G"
             self.amount_polygan = file.readline().strip("\s\n\r\t")
-            if self.amount_polygan is not None:
+            if self.amount_polygan is not None and line != "":
                 self.amount_polygan = int(self.amount_polygan)
                 for i in range(self.amount_polygan):
                     polygan = []
@@ -51,12 +51,11 @@ class World():
                     self.polygans.append(polygan)
 
             line = file.readline().strip("\s\n\r\t")
-            if line is not None:
+            if line is not None and line != "":
                 tmp = [int(i) for i in line.split(",")]
                 for j in range(0, len(tmp), 2):
                     self.area[tmp[j + 1]][tmp[j]] = "P"
                     self.stops.append((tmp[j + 1], tmp[j]))
-
 
 
     def eucliean_distance(self, x1, y1, x2, y2):
@@ -64,7 +63,6 @@ class World():
 
 
     def drawing_polygan(self, polygan : list):
-
         def match_two_point(point_a : tuple, point_b : tuple):
             if point_a[0] == point_b[0]:
                 for match in range(0, abs(point_a[1] - point_b[1]) + 1):
@@ -114,9 +112,6 @@ class World():
                     y_next = y_tmp
                     self.area[x_next][y_next] = "#"
 
-
-            
-
         self.area[polygan[0][0]][polygan[0][1]] = "#"
         for index in range(1, len(polygan)):
             curr = polygan[index]
@@ -126,7 +121,8 @@ class World():
         match_two_point(polygan[0], polygan[len(polygan) - 1])
 
 
-    def a_star_search(self):
+    def greedy_search(self) -> list:
+        robot_path = []
         positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
         start_point = self.robot.get_start_point()
         passing_points = []
@@ -150,11 +146,6 @@ class World():
                 y_tmp = y_next
                 for position in positions:
                     if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
-                        if x_next + position[0] == end_point[0] and y_next + position[1] == end_point[1]:
-                            x_tmp = end_point[0]
-                            y_tmp = end_point[1]
-                            break
-
                         if self.area[x_next + position[0]][y_next + position[1]] == 0:
                             path_weight = round(
                                 self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0], end_point[1]),
@@ -168,6 +159,11 @@ class World():
 
                                 path_weight += 1.50
 
+                            if x_next + position[0] == end_point[0] and y_next + position[1] == end_point[1]:
+                                x_tmp = end_point[0]
+                                y_tmp = end_point[1]
+                                break
+
                             if path_weight < minimum:
                                 minimum = path_weight
                                 x_tmp = x_next + position[0]
@@ -175,15 +171,91 @@ class World():
 
                 x_next = x_tmp
                 y_next = y_tmp
-                if self.area[x_next][y_next] != "G" and self.area[x_next][y_next] != "P":
-                    self.area[x_next][y_next] = "+"
+                robot_path.append((x_next, y_next))
+                self.area[x_next][y_next] = "+"
 
                 start_point = end_point
 
-    def write_output(self):
-        pass
+        return robot_path
+
+    def dijkstra_search(self) -> list:
+        robot_path = []
+        positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
+        queue_points = list()
+        closed_points = {}
+        for i in range(1, self.width):
+            closed_points[i] = set()
+        start_point = self.robot.get_start_point()
+        end_point = self.robot.get_end_point()
+        queue_points.append(start_point)
+        area_with_weight = copy.deepcopy(self.area)
+        while queue_points:
+            curr_point = queue_points.pop()
+            x_tmp = curr_point[0]
+            y_tmp = curr_point[1]
+            closed_points[x_tmp].add(y_tmp)
+            for position in positions:
+                if type(self.area[x_tmp + position[0]][y_tmp + position[1]]) != str:
+                    if position[0] == 0 or position[1] == 0:
+                        tmp_weight = area_with_weight[x_tmp][y_tmp] + 1
+                    else:
+                        if position[0] != 0 and position[1] != 0:
+                            if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][y_tmp] != 0:
+                                continue
+
+                        tmp_weight = area_with_weight[x_tmp][y_tmp] + 1.50
+
+                    if area_with_weight[x_tmp + position[0]][y_tmp + position[1]] == 0 or area_with_weight[x_tmp + position[0]][y_tmp + position[1]] > tmp_weight:
+                        area_with_weight[x_tmp + position[0]][y_tmp + position[1]] = tmp_weight
+
+                    if 0 < x_tmp + position[0] < self.width and 0 < y_tmp + position[1] < self.leng:
+                        if y_tmp + position[1] not in closed_points[x_tmp + position[0]]:
+                            if position[0] != 0 and position[1] != 0:
+                                if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][y_tmp] != 0:
+                                    continue
+
+                            queue_points.append((x_tmp + position[0], y_tmp + position[1]))
+
+            if x_tmp == end_point[0] and y_tmp == end_point[1]:
+                # This print command is only for tests
+                # for i in range(self.width - 1, -1, -1):
+                #     for j in range(self.leng):
+                #         if type(area_with_weight[i][j]) == float:
+                #             if area_with_weight[i][j] >= 10.0:
+                #                 print(area_with_weight[i][j], end = " ")
+                #             else:
+                #                 print(str(area_with_weight[i][j]) + "-", end=" ")
+                #         else:
+                #             print(str(area_with_weight[i][j]) + "---", end=" ")
+                #     print()
+                area_with_weight[start_point[0]][start_point[1]] = 0
+                while not (end_point[0] == start_point[0] and end_point[1] == start_point[1]):
+                    for position in positions:
+                        if position[0] == 0 or position[1] == 0:
+                            if area_with_weight[end_point[0]][end_point[1]] - 1 == area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
+                                robot_path.insert(0, (end_point[0] + position[0],end_point[1] + position[1]))
+                                end_point = (end_point[0] + position[0], end_point[1] + position[1])
+                                break
+
+                        else:
+                            if area_with_weight[end_point[0]][end_point[1]] - 1.50 == area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
+                                robot_path.insert(0, (end_point[0] + position[0],end_point[1] + position[1]))
+                                end_point = (end_point[0] + position[0], end_point[1] + position[1])
+                                break
+
+                    self.area[end_point[0]][end_point[1]] = "+"
+
+                break
+
+        return robot_path
+
+
 
     def print_area(self):
+        start_point = self.robot.get_start_point()
+        self.area[start_point[0]][start_point[1]] = "S"
+        end_point = self.robot.get_end_point()
+        self.area[end_point[0]][end_point[1]] = "G"
         for i in range(self.width - 1, -1, -1):
             for j in range(self.leng):
                 print(self.area[i][j], end=" ")
@@ -195,5 +267,6 @@ world.read_input()
 for i in world.polygans:
     world.drawing_polygan(i)
 
-world.a_star_search()
+# world.greedy_search()
+world.dijkstra_search()
 world.print_area()
