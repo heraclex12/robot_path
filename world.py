@@ -182,6 +182,7 @@ class World():
                 cost += self.eucliean_distance(passing_points[i][0], passing_points[i][1], passing_points[i + 1][0], passing_points[i + 1][1])
             find_permutation(len(passing_points) - 1, cost, passing_points, cost)
         passing_points.append(self.robot.get_end_point())
+        cnt = 1
         while passing_points:
             minimum = self.leng * self.width
             stop_index = 0
@@ -226,9 +227,9 @@ class World():
                 x_next = x_tmp
                 y_next = y_tmp
                 robot_path.append((x_next, y_next))
-                self.area[x_next][y_next] = "+"
-
+                self.area[x_next][y_next] = "+" * cnt
                 start_point = end_point
+            cnt += 1
 
         return robot_path
 
