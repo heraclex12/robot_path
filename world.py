@@ -245,7 +245,7 @@ class World():
         end_point = self.robot.get_end_point()
         queue_points.put(start_point)
         area_with_weight = copy.deepcopy(self.area)
-        while queue_points:
+        while not queue_points.empty():
             curr_point = queue_points.get()
             x_tmp = curr_point[0]
             y_tmp = curr_point[1]
@@ -298,7 +298,10 @@ class World():
                         if y_tmp + position[1] not in closed_points[x_tmp + position[0]]:
                             queue_points.put((x_tmp + position[0], y_tmp + position[1]))
 
-        return robot_path
+        end_point = self.robot.get_end_point()
+        if area_with_weight[end_point[0]][end_point[1]] == 0:
+            return 0, []
+        return area_with_weight[end_point[0]][end_point[1]], robot_path
 
     def print_area(self):
         start_point = self.robot.get_start_point()
@@ -320,5 +323,8 @@ if __name__ == '__main__':
         world.drawing_polygan(i)
 
     # world.greedy_search()
-    world.dijkstra_search()
-    world.print_area()
+    s, paths = world.dijkstra_search()
+    if s == 0:
+        print("Can't find the way!!!")
+    else:
+        world.print_area()
