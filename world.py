@@ -335,14 +335,13 @@ if __name__ == '__main__':
     drawGrid(width-1, height-1, win)
     for i in world.polygans:
         drawPath(processMaxtrix(world.drawing_polygan(i)),random_color(),win,height-1)
-    drawPath(processMaxtrix(world.greedy_search()),random_color(),win,height-1)
-    #world.dijkstra_search()
-    world.print_area(win)
-    win.getMouse()
-    win.close()
+    
     # world.greedy_search()
     s, paths = world.dijkstra_search()
     if s == 0:
         print("Can't find the way!!!")
     else:
-        world.print_area()
+        drawPath(processMaxtrix(paths), random_color(), win, height - 1)
+        world.print_area(win)
+    win.getMouse()
+    win.close()
