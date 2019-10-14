@@ -1,6 +1,7 @@
-from robot_path.robot import Robot
-import copy
 import queue
+from robot import Robot
+import copy
+from draw import *
 
 # Quy ước:
 #            # : hình đa giác
@@ -21,7 +22,10 @@ class World():
         self.robot = Robot(0,0,0,0)
         self.amount_stop = 0
         self.stops = []
-
+    def getWidth(self):
+        return  self.width
+    def getLeng(self):
+        return  self.leng
     def read_input(self):
         with open("input.txt", "r") as file:
             line = file.readline().strip("\s\n\r\t")
@@ -303,13 +307,18 @@ class World():
             return 0, []
         return area_with_weight[end_point[0]][end_point[1]], robot_path
 
-    def print_area(self):
+    def print_area(self,win):
         start_point = self.robot.get_start_point()
         self.area[start_point[0]][start_point[1]] = "S"
+        print([start_point[0],start_point[1]])
+        drawText(start_point[1],start_point[0],self.width-1,win,"S",20)
         end_point = self.robot.get_end_point()
         self.area[end_point[0]][end_point[1]] = "G"
+        drawText(end_point[1], end_point[0], self.width - 1, win, "G", 20)
+
         for i in self.stops:
             self.area[i[0]][i[1]] = "P"
+            drawText(i[1],i[0],self.width-1,win,"P",20)
         for i in range(self.width - 1, -1, -1):
             for j in range(self.leng):
                 print(self.area[i][j], end=" ")
@@ -319,9 +328,18 @@ class World():
 if __name__ == '__main__':
     world = World()
     world.read_input()
+    width =  world.getLeng()
+    height = world.getWidth()
+    ratio = 30
+    win = GraphWin("robot_path", (width) * ratio, (height) * ratio)
+    drawGrid(width-1, height-1, win)
     for i in world.polygans:
-        world.drawing_polygan(i)
-
+        drawPath(processMaxtrix(world.drawing_polygan(i)),random_color(),win,height-1)
+    drawPath(processMaxtrix(world.greedy_search()),random_color(),win,height-1)
+    #world.dijkstra_search()
+    world.print_area(win)
+    win.getMouse()
+    win.close()
     # world.greedy_search()
     s, paths = world.dijkstra_search()
     if s == 0:
