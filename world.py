@@ -345,15 +345,23 @@ if __name__ == '__main__':
     win = GraphWin("robot_path", (width) * ratio, (height) * ratio)
     drawGrid(width - 1, height - 1, win)
     for i in world.polygans:
+<<<<<<< HEAD
         drawPath(processMaxtrix(world.drawing_polygan(i)), random_color(), win, height - 1)
 
+=======
+        drawPath(processMaxtrix(world.drawing_polygan(i)),random_color(),win,height-1)
+    
+>>>>>>> 1b0b05bfaac6be685510b69b8ec470e759346aa5
     # world.greedy_search()
     s, paths = world.dijkstra_search()
     if s == 0:
         print("Can't find the way!!!")
     else:
         drawPath(processMaxtrix(paths), random_color(), win, height - 1)
+<<<<<<< HEAD
         #drawPath(processMaxtrix(world.greedy_search()), random_color(), win, height - 1)
+=======
+>>>>>>> 1b0b05bfaac6be685510b69b8ec470e759346aa5
         world.print_area(win)
     win.getMouse()
     win.close()
