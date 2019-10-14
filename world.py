@@ -1,5 +1,6 @@
-from CSTTNT.robot_path.robot import Robot
+from robot_path.robot import Robot
 import copy
+import queue
 
 # Quy ước:
 #            # : hình đa giác
@@ -22,7 +23,7 @@ class World():
         self.stops = []
 
     def read_input(self):
-        with open("input_2.txt", "r") as file:
+        with open("input.txt", "r") as file:
             line = file.readline().strip("\s\n\r\t")
             self.leng, self.width = [int(i) + 1 for i in line.split(",")]
             for i in range(self.width):
@@ -236,41 +237,18 @@ class World():
     def dijkstra_search(self) -> list:
         robot_path = []
         positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
-        queue_points = list()
+        queue_points = queue.Queue()
         closed_points = {}
         for i in range(1, self.width):
-            closed_points[i] = set()
+            closed_points[i] = {}
         start_point = self.robot.get_start_point()
         end_point = self.robot.get_end_point()
-        queue_points.append(start_point)
+        queue_points.put(start_point)
         area_with_weight = copy.deepcopy(self.area)
         while queue_points:
-            curr_point = queue_points.pop(0)
+            curr_point = queue_points.get()
             x_tmp = curr_point[0]
             y_tmp = curr_point[1]
-            closed_points[x_tmp].add(y_tmp)
-            for position in positions:
-                if type(self.area[x_tmp + position[0]][y_tmp + position[1]]) != str:
-                    if position[0] == 0 or position[1] == 0:
-                        tmp_weight = area_with_weight[x_tmp][y_tmp] + 1
-                    else:
-                        if position[0] != 0 and position[1] != 0:
-                            if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][y_tmp] != 0:
-                                continue
-
-                        tmp_weight = area_with_weight[x_tmp][y_tmp] + 1.50
-
-                    if area_with_weight[x_tmp + position[0]][y_tmp + position[1]] == 0 or area_with_weight[x_tmp + position[0]][y_tmp + position[1]] > tmp_weight:
-                        area_with_weight[x_tmp + position[0]][y_tmp + position[1]] = tmp_weight
-
-                    if 0 < x_tmp + position[0] < self.width and 0 < y_tmp + position[1] < self.leng:
-                        if y_tmp + position[1] not in closed_points[x_tmp + position[0]]:
-                            if position[0] != 0 and position[1] != 0:
-                                if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][y_tmp] != 0:
-                                    continue
-
-                            queue_points.append((x_tmp + position[0], y_tmp + position[1]))
-
             if x_tmp == end_point[0] and y_tmp == end_point[1]:
                 # This print command is only for tests
                 # for i in range(self.width - 1, -1, -1):
@@ -288,19 +266,37 @@ class World():
                     for position in positions:
                         if position[0] == 0 or position[1] == 0:
                             if area_with_weight[end_point[0]][end_point[1]] - 1 == area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
-                                robot_path.insert(0, (end_point[0] + position[0],end_point[1] + position[1]))
+                                robot_path.append((end_point[0] + position[0],end_point[1] + position[1]))
                                 end_point = (end_point[0] + position[0], end_point[1] + position[1])
                                 break
 
                         else:
                             if area_with_weight[end_point[0]][end_point[1]] - 1.50 == area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
-                                robot_path.insert(0, (end_point[0] + position[0],end_point[1] + position[1]))
+                                robot_path.append((end_point[0] + position[0],end_point[1] + position[1]))
                                 end_point = (end_point[0] + position[0], end_point[1] + position[1])
                                 break
 
                     self.area[end_point[0]][end_point[1]] = "+"
 
                 break
+
+            closed_points[x_tmp][y_tmp] = 0
+            for position in positions:
+                if 0 < x_tmp + position[0] < self.width and 0 < y_tmp + position[1] < self.leng:
+                    if self.area[x_tmp + position[0]][y_tmp + position[1]] == 0:
+                        if position[0] == 0 or position[1] == 0:
+                            tmp_weight = area_with_weight[x_tmp][y_tmp] + 1
+                        else:
+                            if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][y_tmp] != 0:
+                                continue
+
+                            tmp_weight = area_with_weight[x_tmp][y_tmp] + 1.50
+
+                        if area_with_weight[x_tmp + position[0]][y_tmp + position[1]] == 0 or area_with_weight[x_tmp + position[0]][y_tmp + position[1]] > tmp_weight:
+                            area_with_weight[x_tmp + position[0]][y_tmp + position[1]] = tmp_weight
+
+                        if y_tmp + position[1] not in closed_points[x_tmp + position[0]]:
+                            queue_points.put((x_tmp + position[0], y_tmp + position[1]))
 
         return robot_path
 
@@ -323,6 +319,6 @@ if __name__ == '__main__':
     for i in world.polygans:
         world.drawing_polygan(i)
 
-    world.greedy_search()
-    # world.dijkstra_search()
+    # world.greedy_search()
+    world.dijkstra_search()
     world.print_area()
