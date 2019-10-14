@@ -1,7 +1,8 @@
 from robot import Robot
 import copy
 from draw import *
-from graphics import *
+
+
 # Quy ước:
 #            # : hình đa giác
 #            0 : vị trí trống
@@ -21,7 +22,10 @@ class World():
         self.robot = Robot(0,0,0,0)
         self.amount_stop = 0
         self.stops = []
-
+    def getWidth(self):
+        return  self.width
+    def getLeng(self):
+        return  self.leng
     def read_input(self):
         with open("input_2.txt", "r") as file:
             line = file.readline().strip("\s\n\r\t")
@@ -302,15 +306,21 @@ class World():
                     self.area[end_point[0]][end_point[1]] = "+"
 
                 break
+
         return robot_path
 
-    def print_area(self):
+    def print_area(self,win):
         start_point = self.robot.get_start_point()
         self.area[start_point[0]][start_point[1]] = "S"
+        print([start_point[0],start_point[1]])
+        drawText(start_point[1],start_point[0],self.width-1,win,"S",20)
         end_point = self.robot.get_end_point()
         self.area[end_point[0]][end_point[1]] = "G"
+        drawText(end_point[1], end_point[0], self.width - 1, win, "G", 20)
+
         for i in self.stops:
             self.area[i[0]][i[1]] = "P"
+            drawText(i[1],i[0],self.width-1,win,"P",20)
         for i in range(self.width - 1, -1, -1):
             for j in range(self.leng):
                 print(self.area[i][j], end=" ")
@@ -320,37 +330,17 @@ class World():
 if __name__ == '__main__':
     world = World()
     world.read_input()
+    width =  world.getLeng()
+    height = world.getWidth()
+    ratio = 30
+    win = GraphWin("robot_path", (width) * ratio, (height) * ratio)
+    drawGrid(width-1, height-1, win)
     for i in world.polygans:
-        world.drawing_polygan(i)
+        drawPath(processMaxtrix(world.drawing_polygan(i)),random_color(),win,height-1)
+    drawPath(processMaxtrix(world.greedy_search()),random_color(),win,height-1)
+    #world.dijkstra_search()
+    world.print_area(win)
+    win.getMouse()
+    win.close()
 
-<<<<<<< HEAD
-# world.greedy_search()
-path=world.dijkstra_search()
-world.print_area()
 
-motchieu=rvto1d(path)
-oldpath=[2,2,3,3,4,3,5,3,6,3,7,3,8,3,9,4,10,5,10,6,10,7,11,8,12,9,13,10,14,11,15,12,16,13,17,14,18,15,19,16]
-plg1=[4,4,4,5,4,6,4,7,4,8,5,9,6,9,7,10,8,10,9,9,9,8,9,7,9,6,9,5,8,5,8,5,7,4,6,4,5,4,8,4]
-plg2=[11,1,11,2,11,3,11,4,11,5,11,6,11,6,12,6,13,6,14,6,14,5,14,4,14,3,14,2,14,1,13,1,12,1]
-plg3=[8,12,8,13,8,14,8,15,8,16,8,17,9,16,10,15,11,14,12,13,13,12,12,12,11,12,10,12,9,12,8,12]
-
-width=22
-height=18
-ratio=30
-
-win=GraphWin("robot_path",(width+1)*ratio,(height+1)*ratio)
-drawGrid(width,height,win)
-drawPath(oldpath,color_rgb(150,150,150),win,height)
-drawPath(plg1,color_rgb(255,0,0),win,height)
-drawPath(plg2,color_rgb(0,255,0),win,height)
-drawPath(plg3,color_rgb(220,116,0),win,height)
-drawPath(motchieu,color_rgb(100,100,100),win,height)
-drawText(2,2,height,win,"S",20)
-drawText(19,16,height,win,"G",20)
-win.getMouse()
-win.close()
-=======
-    world.greedy_search()
-    # world.dijkstra_search()
-    world.print_area()
->>>>>>> 9da5c1a7cfc7993619e9ef01b99160fd9812430d

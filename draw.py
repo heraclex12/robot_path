@@ -1,4 +1,5 @@
 from graphics import *
+import random
 
 def drawPath(list,color,win,height):
     scale=30
@@ -47,7 +48,7 @@ def drawGrid(width,height,win):
         drawText(i,0,height,win,str(i),10)
     for i in range(height+1):
         drawText(0,i,height,win,str(i),10)
-def rvto1d(_2d):
+def reverseArray(_2d):
     list=[]
     index=0
     for i in _2d:
@@ -56,3 +57,13 @@ def rvto1d(_2d):
         list.append(_2d[index][1])
         index += 1
     return list
+def processMaxtrix(_2d):
+    list=reverseArray(_2d)
+    leng=len(list)
+    for i in range(0,leng,2):
+        list[i],list[i+1]=list[i+1],list[i]
+    return list
+def random_color():
+    return color_rgb(random.randint(0,255),random.randint(0,255),random.randint(0,255))
+
+
