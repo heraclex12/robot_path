@@ -1,13 +1,20 @@
+<<<<<<< HEAD
 
 
 from draw import *
 
 
+=======
+import queue
+>>>>>>> 26f3840cb65c203513d4e74549bee51f462ae2c7
 from robot import Robot
 import copy
 import queue
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 26f3840cb65c203513d4e74549bee51f462ae2c7
 # Quy ước:
 #            # : hình đa giác
 #            0 : vị trí trống
@@ -254,7 +261,7 @@ class World():
         end_point = self.robot.get_end_point()
         queue_points.put(start_point)
         area_with_weight = copy.deepcopy(self.area)
-        while queue_points:
+        while not queue_points.empty():
             curr_point = queue_points.get()
             x_tmp = curr_point[0]
             y_tmp = curr_point[1]
@@ -307,7 +314,10 @@ class World():
                         if y_tmp + position[1] not in closed_points[x_tmp + position[0]]:
                             queue_points.put((x_tmp + position[0], y_tmp + position[1]))
 
-        return robot_path
+        end_point = self.robot.get_end_point()
+        if area_with_weight[end_point[0]][end_point[1]] == 0:
+            return 0, []
+        return area_with_weight[end_point[0]][end_point[1]], robot_path
 
     def print_area(self,win):
         start_point = self.robot.get_start_point()
@@ -341,9 +351,18 @@ if __name__ == '__main__':
     #drawPath(processMaxtrix( world.dijkstra_search(),random_color(),win,height-1))
     win.getMouse()
     win.close()
+<<<<<<< HEAD
 
 
 
     # world.greedy_search()
 
 
+=======
+    # world.greedy_search()
+    s, paths = world.dijkstra_search()
+    if s == 0:
+        print("Can't find the way!!!")
+    else:
+        world.print_area()
+>>>>>>> 26f3840cb65c203513d4e74549bee51f462ae2c7
