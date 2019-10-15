@@ -6,7 +6,6 @@ import random
 import time
 import sys
 
-
 # Quy ước:
 #            # : hình đa giác
 #            0 : vị trí trống
@@ -33,15 +32,9 @@ class World():
     def getLeng(self):
         return self.leng
 
-<<<<<<< HEAD
-    def read_input(self):
-        with open("input.txt", "r") as file:
-            line = file.readline().strip("\s\n\r\t")
-=======
     def read_input(self, filename : str):
         with open(filename, "r") as file:
             line = file.readline().strip("\\ \n\r\t")
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
             self.leng, self.width = [int(i) + 1 for i in line.split(",")]
             for i in range(self.width):
                 row = []
@@ -71,11 +64,13 @@ class World():
 
                     self.polygans.append(polygan)
 
+
     def eucliean_distance(self, x1, y1, x2, y2):
         return (((x2 - x1) ** 2) + ((y2 - y1) ** 2)) ** 0.5
 
-    def drawing_polygan(self, polygan: list) -> list:
-        def match_two_point(point_a: tuple, point_b: tuple) -> list:
+
+    def drawing_polygan(self, polygan : list) -> list:
+        def match_two_point(point_a : tuple, point_b : tuple) -> list:
             polygan_path = []
             if point_a[0] == point_b[0]:
                 for match in range(0, abs(point_a[1] - point_b[1]) + 1):
@@ -113,9 +108,7 @@ class World():
                                 break
 
                             if self.area[x_next + position[0]][y_next + position[1]] == 0:
-                                path_weight = round(
-                                    self.eucliean_distance(x_next + position[0], y_next + position[1], point_b[0],
-                                                           point_b[1]), 2)
+                                path_weight = round(self.eucliean_distance(x_next + position[0], y_next + position[1], point_b[0], point_b[1]), 2)
                                 if position[0] == 0 or position[1] == 0:
                                     path_weight += 1
 
@@ -144,14 +137,9 @@ class World():
         polygan_path.extend(match_two_point(polygan[0], polygan[len(polygan) - 1]))
         return polygan_path
 
-<<<<<<< HEAD
-    def greedy_search(self) -> list:
-        def find_permutation(k: int, min_c: int, perm: list, cost: int):
-=======
 
     def greedy_search(self, win):
         def find_permutation(k: int, min_c: int, perm: list, cost: int, result: list) -> float:
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
             if k == 1:
                 if min_c > cost:
                     min_c = cost
@@ -194,11 +182,7 @@ class World():
 
             find_permutation(k - 1, min_c, perm, cost, result)
 
-<<<<<<< HEAD
-        robot_path = []
-=======
 
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
         positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
         start_point = self.robot.get_start_point()
         passing_points = []
@@ -206,16 +190,10 @@ class World():
         if len(passing_points) >= 2:
             cost = self.eucliean_distance(start_point[0], start_point[1], passing_points[0][0], passing_points[0][1])
             for i in range(0, len(passing_points) - 1):
-<<<<<<< HEAD
-                cost += self.eucliean_distance(passing_points[i][0], passing_points[i][1], passing_points[i + 1][0],
-                                               passing_points[i + 1][1])
-            find_permutation(len(passing_points) - 1, cost, passing_points, cost)
-=======
                 cost += self.eucliean_distance(passing_points[i][0], passing_points[i][1], passing_points[i + 1][0], passing_points[i + 1][1])
 
             pass_tmp = passing_points[:]
             find_permutation(len(passing_points) - 1, cost, pass_tmp, cost, passing_points)
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
         passing_points.append(self.robot.get_end_point())
         best_weight = 0
         while passing_points:
@@ -223,9 +201,7 @@ class World():
             minimum = self.leng * self.width
             stop_index = 0
             for point_index in range(len(passing_points) - 1):
-                path_weight = round(
-                    self.eucliean_distance(start_point[0], start_point[1], passing_points[point_index][0],
-                                           passing_points[point_index][1]), 2)
+                path_weight = round(self.eucliean_distance(start_point[0], start_point[1], passing_points[point_index][0], passing_points[point_index][1]), 2)
                 if path_weight < minimum:
                     minimum = path_weight
                     stop_index = point_index
@@ -242,8 +218,7 @@ class World():
                     if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
                         if self.area[x_next + position[0]][y_next + position[1]] == 0 or self.area[x_next + position[0]][y_next + position[1]] == "+":
                             path_weight = round(
-                                self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0],
-                                                       end_point[1]),
+                                self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0], end_point[1]),
                                 2)
                             if self.area[x_next + position[0]][y_next + position[1]] == "+":
                                 path_weight += 1
@@ -251,8 +226,7 @@ class World():
                                 path_weight += 1
 
                             else:
-                                if self.area[x_next][y_next + position[1]] != 0 and self.area[x_next + position[0]][
-                                    y_next] != 0:
+                                if self.area[x_next][y_next + position[1]] != 0 and self.area[x_next + position[0]][y_next] != 0:
                                     continue
 
                                 path_weight += 1.50
@@ -304,26 +278,14 @@ class World():
                 while not (end_point[0] == start_point[0] and end_point[1] == start_point[1]):
                     for position in positions:
                         if position[0] == 0 or position[1] == 0:
-<<<<<<< HEAD
-                            if area_with_weight[end_point[0]][end_point[1]] - 1 == \
-                                    area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
-                                robot_path.append((end_point[0] + position[0], end_point[1] + position[1]))
-=======
                             if area_with_weight[end_point[0]][end_point[1]] - 1 == area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
                                 drawPath(processMaxtrix([(end_point[0] + position[0],end_point[1] + position[1])]), color_robot, win, self.width - 1)
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
                                 end_point = (end_point[0] + position[0], end_point[1] + position[1])
                                 break
 
                         else:
-<<<<<<< HEAD
-                            if area_with_weight[end_point[0]][end_point[1]] - 1.50 == \
-                                    area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
-                                robot_path.append((end_point[0] + position[0], end_point[1] + position[1]))
-=======
                             if area_with_weight[end_point[0]][end_point[1]] - 1.50 == area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
                                 drawPath(processMaxtrix([(end_point[0] + position[0],end_point[1] + position[1])]), color_robot, win, self.width - 1)
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
                                 end_point = (end_point[0] + position[0], end_point[1] + position[1])
                                 break
 
@@ -337,14 +299,12 @@ class World():
                         if position[0] == 0 or position[1] == 0:
                             tmp_weight = area_with_weight[x_tmp][y_tmp] + 1
                         else:
-                            if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][
-                                y_tmp] != 0:
+                            if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][y_tmp] != 0:
                                 continue
 
                             tmp_weight = area_with_weight[x_tmp][y_tmp] + 1.50
 
-                        if area_with_weight[x_tmp + position[0]][y_tmp + position[1]] == 0 or \
-                                area_with_weight[x_tmp + position[0]][y_tmp + position[1]] > tmp_weight:
+                        if area_with_weight[x_tmp + position[0]][y_tmp + position[1]] == 0 or area_with_weight[x_tmp + position[0]][y_tmp + position[1]] > tmp_weight:
                             area_with_weight[x_tmp + position[0]][y_tmp + position[1]] = tmp_weight
 
                         if closed_points[x_tmp + position[0]][y_tmp + position[1]] == 0:
@@ -361,22 +321,14 @@ class World():
         start_point = self.robot.get_start_point()
         self.area[start_point[0]][start_point[1]] = "S"
         print([start_point[0], start_point[1]])
-<<<<<<< HEAD
-        drawText(start_point[1], start_point[0], self.width - 1, win, "S", 20)
-=======
         drawText(start_point[1], start_point[0], self.width-1, win, "S", 20)
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
         end_point = self.robot.get_end_point()
         self.area[end_point[0]][end_point[1]] = "G"
         drawText(end_point[1], end_point[0], self.width - 1, win, "G", 20)
 
         for i in self.stops:
             self.area[i[0]][i[1]] = "P"
-<<<<<<< HEAD
-            drawText(i[1], i[0], self.width - 1, win, "P", 20)
-=======
             drawText(i[1], i[0], self.width-1, win, "P", 20)
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
         for i in range(self.width - 1, -1, -1):
             for j in range(self.leng):
                 print(self.area[i][j], end=" ")
@@ -575,28 +527,6 @@ class World():
 
 
 if __name__ == '__main__':
-<<<<<<< HEAD
-    world = World()
-    world.read_input()
-    width = world.getLeng()
-    height = world.getWidth()
-    ratio = 30
-    win = GraphWin("robot_path", (width) * ratio, (height) * ratio)
-    drawGrid(width - 1, height - 1, win)
-    for i in world.polygans:
-        drawPath(processMaxtrix(world.drawing_polygan(i)), random_color(), win, height - 1)
-    # world.greedy_search()
-    #s, paths = world.dijkstra_search()
-    #if s == 0:
-     #   print("Can't find the way!!!")
- #   else:
-    #    drawPath(processMaxtrix(paths), random_color(), win, height - 1)
-     #   world.print_area(win)
-    drawPath(processMaxtrix(world.greedy_search()),random_color(),win,height-1)
-    world.print_area(win)
-    win.getMouse()
-    win.close()
-=======
     task = None
     input_file = None
     if len(sys.argv) == 5:
@@ -666,4 +596,3 @@ if __name__ == '__main__':
 
     else:
         print("Missing argument values.")
->>>>>>> 6aa41c14f4b675d9f0014e479c95996c15e81c30
