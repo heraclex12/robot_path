@@ -1,6 +1,7 @@
 from graphics import *
 import random
-
+pink=color_rgb(255,0,172)
+purple=color_rgb(153,0,239)
 def drawPath(list,color,win,height):
     scale=30
     k = 0
