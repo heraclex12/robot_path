@@ -195,7 +195,6 @@ class World():
             pass_tmp = passing_points[:]
             find_permutation(len(passing_points) - 1, cost, pass_tmp, cost, passing_points)
         passing_points.append(self.robot.get_end_point())
-        best_weight = 0
         while passing_points:
             robot_paths = []
             minimum = self.leng * self.width
@@ -210,6 +209,7 @@ class World():
             x_next = start_point[0]
             y_next = start_point[1]
             color_robot = random_color()
+            best_weight = 0
             while not (x_next == end_point[0] and y_next == end_point[1]):
                 minimum = self.leng * self.width
                 x_tmp = x_next
@@ -221,7 +221,8 @@ class World():
                                 self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0], end_point[1]),
                                 2)
                             if self.area[x_next + position[0]][y_next + position[1]] == "+":
-                                path_weight += 1
+                                path_weight += 2
+
                             if position[0] == 0 or position[1] == 0:
                                 path_weight += 1
 
@@ -275,6 +276,7 @@ class World():
             y_tmp = curr_point[1]
             if x_tmp == end_point[0] and y_tmp == end_point[1]:
                 area_with_weight[start_point[0]][start_point[1]] = 0
+                drawPath(processMaxtrix([(end_point[0], end_point[1])]), color_robot, win, self.width - 1)
                 while not (end_point[0] == start_point[0] and end_point[1] == start_point[1]):
                     for position in positions:
                         if position[0] == 0 or position[1] == 0:
