@@ -51,6 +51,7 @@ class World():
             self.robot = Robot(tmp[1], tmp[0], tmp[3], tmp[2])
             for j in range(4, len(tmp), 2):
                 self.stops.append((tmp[j + 1], tmp[j]))
+                self.amount_stop += 1
 
             self.amount_polygan = file.readline().strip("\\ \n\r\t")
             if self.amount_polygan is not None and line != "":
@@ -137,91 +138,62 @@ class World():
         polygan_path.extend(match_two_point(polygan[0], polygan[len(polygan) - 1]))
         return polygan_path
 
+    def find_permutation(self, k, perm):
+        if k == 1:
+            path_weight = 0
+            min_cost = 0
+            prev_stops = [self.robot.get_start_point()]
+            prev_stops.extend(self.stops[:])
+            prev_stops.append(self.robot.get_end_point())
+            for point_index in range(len(perm) - 1):
+                min_cost += round(self.eucliean_distance(prev_stops[point_index][0], prev_stops[point_index][1], prev_stops[point_index + 1][0], prev_stops[point_index + 1][1]), 2)
+                path_weight += round(self.eucliean_distance(perm[point_index][0], perm[point_index][1], perm[point_index + 1][0], perm[point_index + 1][1]), 2)
+
+            if path_weight < min_cost:
+                self.stops = perm[1: len(perm) - 1]
+
+        else:
+            for i in range(1, k):
+                self.find_permutation(k - 1, perm)
+                if k % 2 == 0:
+                    perm[i], perm[k] = perm[k], perm[i]
+                else:
+                    perm[1], perm[k] = perm[k], perm[1]
+
+            self.find_permutation(k - 1, perm)
+
 
     def greedy_search(self, win):
-        def find_permutation(k: int, min_c: int, perm: list, cost: int, result: list) -> float:
-            if k == 1:
-                if min_c > cost:
-                    min_c = cost
-                    result = perm[:]
-                return
-            for i in range(k - 1):
-                find_permutation(k - 1, min_c, perm, cost, result)
-                if k % 2 == 0:
-                    perm[i], perm[k - 1] = perm[k - 1], perm[i]
-                    if i >= 1:
-                        cost -= self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[i + 1][0], perm[i + 1][1])
-                        cost -= self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[i - 1][0], perm[i - 1][1])
-                        cost += self.eucliean_distance(perm[i][0], perm[i][1], perm[i + 1][0], perm[i + 1][1])
-                        cost += self.eucliean_distance(perm[i][0], perm[i][1], perm[i - 1][0], perm[i - 1][1])
-                    else:
-                        cost -= self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[i + 1][0], perm[i + 1][1])
-                        cost += self.eucliean_distance(perm[i][0], perm[i][1], perm[i + 1][0], perm[i + 1][1])
-
-                    if k - 1 >= 1:
-                        cost -= self.eucliean_distance(perm[i][0], perm[i][1], perm[k][0], perm[k][1])
-                        cost += self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[k][0], perm[k][1])
-                        cost -= self.eucliean_distance(perm[i][0], perm[i][1], perm[k - 2][0], perm[k - 2][1])
-                        cost += self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[k - 2][0], perm[k - 2][1])
-                    else:
-                        cost -= self.eucliean_distance(perm[i][0], perm[i][1], perm[k][0], perm[k][1])
-                        cost += self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[k][0], perm[k][1])
-
-                else:
-                    perm[0], perm[k - 1] = perm[k - 1], perm[0]
-                    cost -= self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[1][0], perm[1][1])
-                    cost += self.eucliean_distance(perm[0][0], perm[0][1], perm[1][0], perm[1][1])
-                    if k - 1 >= 1:
-                        cost -= self.eucliean_distance(perm[0][0], perm[0][1], perm[k][0], perm[k][1])
-                        cost += self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[k][0], perm[k][1])
-                        cost -= self.eucliean_distance(perm[0][0], perm[0][1], perm[k - 2][0], perm[k - 2][1])
-                        cost += self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[k - 2][0], perm[k - 2][1])
-                    else:
-                        cost -= self.eucliean_distance(perm[0][0], perm[0][1], perm[k][0], perm[k][1])
-                        cost += self.eucliean_distance(perm[k - 1][0], perm[k - 1][1], perm[k][0], perm[k][1])
-
-            find_permutation(k - 1, min_c, perm, cost, result)
-
-
         positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
         start_point = self.robot.get_start_point()
+        end_point = self.robot.get_end_point()
         passing_points = []
-        passing_points.extend(self.stops)
-        if len(passing_points) >= 2:
-            cost = self.eucliean_distance(start_point[0], start_point[1], passing_points[0][0], passing_points[0][1])
-            for i in range(0, len(passing_points) - 1):
-                cost += self.eucliean_distance(passing_points[i][0], passing_points[i][1], passing_points[i + 1][0], passing_points[i + 1][1])
+        if self.amount_stop > 1:
+            tmp_stops = [start_point]
+            tmp_stops.extend(self.stops[:])
+            tmp_stops.append(end_point)
+            self.find_permutation(self.amount_stop, tmp_stops)
 
-            pass_tmp = passing_points[:]
-            find_permutation(len(passing_points) - 1, cost, pass_tmp, cost, passing_points)
-        passing_points.append(self.robot.get_end_point())
+        passing_points.extend(self.stops[:])
+        passing_points.append(end_point)
+        best_weight = 0
         while passing_points:
             robot_paths = []
             minimum = self.leng * self.width
-            stop_index = 0
-            for point_index in range(len(passing_points) - 1):
-                path_weight = round(self.eucliean_distance(start_point[0], start_point[1], passing_points[point_index][0], passing_points[point_index][1]), 2)
-                if path_weight < minimum:
-                    minimum = path_weight
-                    stop_index = point_index
-
-            end_point = passing_points.pop(stop_index)
+            end_point = passing_points.pop(0)
             x_next = start_point[0]
             y_next = start_point[1]
             color_robot = random_color()
-            best_weight = 0
             while not (x_next == end_point[0] and y_next == end_point[1]):
                 minimum = self.leng * self.width
                 x_tmp = x_next
                 y_tmp = y_next
                 for position in positions:
                     if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
-                        if self.area[x_next + position[0]][y_next + position[1]] == 0 or self.area[x_next + position[0]][y_next + position[1]] == "+":
+                        if self.area[x_next + position[0]][y_next + position[1]] == 0:
                             path_weight = round(
                                 self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0], end_point[1]),
                                 2)
-                            if self.area[x_next + position[0]][y_next + position[1]] == "+":
-                                path_weight += 2
 
                             if position[0] == 0 or position[1] == 0:
                                 path_weight += 1
@@ -276,7 +248,6 @@ class World():
             y_tmp = curr_point[1]
             if x_tmp == end_point[0] and y_tmp == end_point[1]:
                 area_with_weight[start_point[0]][start_point[1]] = 0
-                drawPath(processMaxtrix([(end_point[0], end_point[1])]), color_robot, win, self.width - 1)
                 while not (end_point[0] == start_point[0] and end_point[1] == start_point[1]):
                     for position in positions:
                         if position[0] == 0 or position[1] == 0:
@@ -319,6 +290,96 @@ class World():
 
         return area_with_weight[end_point[0]][end_point[1]]
 
+
+    def astar_search(self, win):
+        positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
+
+        start_point = self.robot.get_start_point()
+        end_point = self.robot.get_end_point()
+        passing_points = []
+        if self.amount_stop > 1:
+            tmp_stops = [start_point]
+            tmp_stops.extend(self.stops[:])
+            tmp_stops.append(end_point)
+            self.find_permutation(self.amount_stop, tmp_stops)
+
+        passing_points.extend(self.stops[:])
+        passing_points.append(end_point)
+        best_cost = 0
+        area_copy = copy.deepcopy(self.area)
+        while passing_points:
+            queue_points = queue.Queue()
+            queue_points.put(start_point)
+            end_point = passing_points.pop(0)
+            color_robot = random_color()
+            area_with_weight = copy.deepcopy(area_copy)
+            closed_points = copy.deepcopy(area_copy)
+            while not queue_points.empty():
+                curr_point = queue_points.get()
+                x_tmp = curr_point[0]
+                y_tmp = curr_point[1]
+                if x_tmp == end_point[0] and y_tmp == end_point[1]:
+                    best_cost += area_with_weight[x_tmp][y_tmp]
+                    drawPath(processMaxtrix([(end_point[0], end_point[1])]), color_robot,
+                             win, self.width - 1)
+                    area_with_weight[start_point[0]][start_point[1]] = 0
+                    while not (end_point[0] == start_point[0] and end_point[1] == start_point[1]):
+                        for position in positions:
+                            if position[0] == 0 or position[1] == 0:
+                                if area_with_weight[end_point[0]][end_point[1]] - 1 == area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
+                                    drawPath(processMaxtrix([(end_point[0] + position[0],end_point[1] + position[1])]), color_robot, win, self.width - 1)
+                                    end_point = (end_point[0] + position[0], end_point[1] + position[1])
+                                    break
+
+                            else:
+                                if area_with_weight[end_point[0]][end_point[1]] - 1.50 == area_with_weight[end_point[0] + position[0]][end_point[1] + position[1]]:
+                                    drawPath(processMaxtrix([(end_point[0] + position[0],end_point[1] + position[1])]), color_robot, win, self.width - 1)
+                                    end_point = (end_point[0] + position[0], end_point[1] + position[1])
+                                    break
+
+                        self.area[end_point[0]][end_point[1]] = "+"
+
+                    break
+
+                tmp_queue = []
+                curr_weight = self.width * self.leng
+                for position in positions:
+                    if 0 < x_tmp + position[0] < self.width and 0 < y_tmp + position[1] < self.leng:
+                        if self.area[x_tmp + position[0]][y_tmp + position[1]] == 0:
+                            h_weight = round(self.eucliean_distance(x_tmp + position[0], y_tmp + position[1], end_point[0], end_point[1]), 2)
+                            if position[0] == 0 or position[1] == 0:
+                                tmp_weight = area_with_weight[x_tmp][y_tmp] + 1
+                            else:
+                                if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][y_tmp] != 0:
+                                    continue
+
+                                tmp_weight = area_with_weight[x_tmp][y_tmp] + 1.50
+
+                            if tmp_weight + h_weight < curr_weight:
+                                curr_weight = tmp_weight + h_weight
+                                if closed_points[x_tmp + position[0]][y_tmp + position[1]] == 0:
+                                    closed_points[x_tmp + position[0]][y_tmp + position[1]] = 1
+                                    tmp_queue.insert(0, (x_tmp + position[0], y_tmp + position[1]))
+                            else:
+                                if closed_points[x_tmp + position[0]][y_tmp + position[1]] == 0:
+                                    closed_points[x_tmp + position[0]][y_tmp + position[1]] = 1
+                                    tmp_queue.append((x_tmp + position[0], y_tmp + position[1]))
+
+                            if area_with_weight[x_tmp + position[0]][y_tmp + position[1]] == 0 or area_with_weight[x_tmp + position[0]][y_tmp + position[1]] >= tmp_weight:
+                                area_with_weight[x_tmp + position[0]][y_tmp + position[1]] = tmp_weight
+
+                for e in tmp_queue:
+                    queue_points.put(e)
+
+            start_point = (x_tmp, y_tmp)
+
+        end_point = self.robot.get_end_point()
+        if area_with_weight[end_point[0]][end_point[1]] == 0:
+            return -1
+
+        return best_cost
+
+
     def print_area(self, win):
         start_point = self.robot.get_start_point()
         self.area[start_point[0]][start_point[1]] = "S"
@@ -352,7 +413,7 @@ class World():
 
         return True, polygan_path
 
-    def greedy_search_with_dynamic(self, polygan_borders: list, color_robot, win) -> float:
+    def greedy_search_with_dynamic(self, polygan_borders, color_robot, win):
         robot_path = []
         positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
         start_point = self.robot.get_start_point()
@@ -388,7 +449,6 @@ class World():
                             drawPath(processMaxtrix(polygan_borders[index_border]), random_color(), win,
                                      self.width - 1)
                             index_border += 1
-                            tmp_step = polygan_steps[:]
                         else:
                             for point in polygan_borders[index_border]:
                                 self.area[point[0]][point[1]] = "#"
@@ -397,37 +457,7 @@ class World():
 
                 for position in positions:
                     if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
-                        if self.area[x_next][y_next] == "#":
-                            for around in positions:
-                                if self.area[x_next + around[0]][y_next + around[1]] == "#":
-                                    if self.area[x_next + (-1) * around[0]][y_next + (-1) * around[1]] == 0 or self.area[x_next + (-1) * around[0]][y_next + (-1) * around[1]] == "+":
-                                        path_weight = round(
-                                            self.eucliean_distance(x_next + (-1) * around[0], y_next + (-1) * around[1], end_point[0],
-                                                                   end_point[1]),
-                                            2)
-                                        if self.area[x_next + (-1) * around[0]][y_next + (-1) * around[1]] == "+":
-                                            path_weight += 1
-
-                                        if around[0] == 0 or around[1] == 0:
-                                            path_weight += 1
-
-                                        else:
-                                            if self.area[x_next][y_next + (-1) * around[1]] != 0 and self.area[x_next +(-1) * around[0]][y_next] != 0:
-                                                continue
-
-                                            path_weight += 1.50
-
-                                        if x_next + (-1) * around[1] == end_point[0] and y_next + (-1) * around[1] == end_point[1]:
-                                            x_tmp = end_point[0]
-                                            y_tmp = end_point[1]
-                                            break
-
-                                        if path_weight < minimum:
-                                            minimum = path_weight
-                                            x_tmp = x_next + (-1) * around[0]
-                                            y_tmp = y_next + (-1) * around[1]
-
-                        elif self.area[x_next + position[0]][y_next + position[1]] == 0 or self.area[x_next + position[0]][y_next + position[1]] == "+":
+                        if self.area[x_next + position[0]][y_next + position[1]] == 0 or self.area[x_next + position[0]][y_next + position[1]] == "+":
                             path_weight = round(
                                 self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0],
                                                        end_point[1]),
@@ -460,6 +490,9 @@ class World():
 
                 else:
                     best_weight += 1.50
+
+                if best_weight > self.width * self.leng:
+                    return -1
 
                 if self.area[x_next][y_next] != "#":
                     drawPath(processMaxtrix([(x_next, y_next)]), color_rgb(255, 255, 255), win, self.width - 1)
@@ -602,7 +635,15 @@ if __name__ == '__main__':
                 print("Cost: " + str(s))
 
         elif task == "astar":
-            pass
+            for polygan in world.polygans:
+                drawPath(processMaxtrix(world.drawing_polygan(polygan)), random_color(), win, height - 1)
+            s = world.astar_search(win)
+            if s == -1:
+                print("Can't find a way!!!")
+            else:
+                world.print_area(win)
+                print("Cost: " + str(s))
+
         elif task == "moving":
             polygan_borders = []
             for polygan in world.polygans:
