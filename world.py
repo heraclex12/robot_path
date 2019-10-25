@@ -619,30 +619,34 @@ if __name__ == '__main__':
                 drawPath(processMaxtrix(world.drawing_polygan(polygan)), random_color(), win, height - 1)
             s = world.dijkstra_search(win)
             if s == -1:
-                print("Can't find a way!!!")
+                world.print_area(win)
+                drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
-                print("Cost: " + str(s))
+                drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
         elif task == "greedy":
             for polygan in world.polygans:
                 drawPath(processMaxtrix(world.drawing_polygan(polygan)), random_color(), win, height - 1)
             s = world.greedy_search(win)
             if s == -1:
-                print("Can't find a way!!!")
+                world.print_area(win)
+                drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
-                print("Cost: " + str(s))
+                drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
+
 
         elif task == "astar":
             for polygan in world.polygans:
                 drawPath(processMaxtrix(world.drawing_polygan(polygan)), random_color(), win, height - 1)
             s = world.astar_search(win)
             if s == -1:
-                print("Can't find a way!!!")
+                world.print_area(win)
+                drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
-                print("Cost: " + str(s))
+                drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
         elif task == "moving":
             polygan_borders = []
@@ -655,9 +659,10 @@ if __name__ == '__main__':
             s = world.greedy_search_with_dynamic(polygan_borders, color_robot, win)
             world.print_area(win)
             if s == -1:
-                print("Can't find a way!!!")
+                drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
-                print("Cost: " + str(s))
+                drawText(width//2, height-1, height - 1, win, "Cost: "+str(s), 20)
+
 
         else:
             print("Wrong search name!!!")
