@@ -373,9 +373,8 @@ class World():
 
             start_point = (x_tmp, y_tmp)
 
-        end_point = self.robot.get_end_point()
-        if area_with_weight[end_point[0]][end_point[1]] == 0:
-            return -1
+            if area_with_weight[end_point[0]][end_point[1]] == 0 and end_point != start_point:
+                return -1
 
         return best_cost
 
