@@ -176,61 +176,63 @@ class World():
 
         passing_points.extend(self.stops[:])
         passing_points.append(end_point)
-        best_weight = 0
+        best_cost = 0
+        area_copy = copy.deepcopy(self.area)
         while passing_points:
-            robot_paths = []
-            minimum = self.leng * self.width
+            queue_points = []
+            queue_points.append(start_point)
             end_point = passing_points.pop(0)
-            x_next = start_point[0]
-            y_next = start_point[1]
             color_robot = random_color()
-            while not (x_next == end_point[0] and y_next == end_point[1]):
-                minimum = self.leng * self.width
-                x_tmp = x_next
-                y_tmp = y_next
-                for position in positions:
-                    if 0 < x_next + position[0] < self.width and 0 < y_next + position[1] < self.leng:
-                        if self.area[x_next + position[0]][y_next + position[1]] == 0:
-                            path_weight = round(
-                                self.eucliean_distance(x_next + position[0], y_next + position[1], end_point[0], end_point[1]),
-                                2)
+            closed_points = copy.deepcopy(area_copy)
+            while queue_points:
+                curr_point = queue_points.pop(0)
+                self.area[curr_point[0]][curr_point[1]] = "+"
+                drawPath(processMaxtrix([(curr_point[0], curr_point[1])]),
+                         color_robot, win, self.width - 1)
+                x_tmp = curr_point[0]
+                y_tmp = curr_point[1]
+                if x_tmp == end_point[0] and y_tmp == end_point[1]:
+                    break
 
+                tmp_queue = []
+                curr_weight = self.width * self.leng
+                for position in positions:
+                    if 0 < x_tmp + position[0] < self.width and 0 < y_tmp + position[1] < self.leng:
+                        if self.area[x_tmp + position[0]][y_tmp + position[1]] == 0:
+                            h_weight = round(
+                                self.eucliean_distance(x_tmp + position[0], y_tmp + position[1], end_point[0],
+                                                       end_point[1]), 2)
                             if position[0] == 0 or position[1] == 0:
-                                path_weight += 1
+                                h_weight += 1
+                                best_cost += 1
 
                             else:
-                                if self.area[x_next][y_next + position[1]] != 0 and self.area[x_next + position[0]][y_next] != 0:
+                                if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][
+                                    y_tmp] != 0:
                                     continue
 
-                                path_weight += 1.50
+                                h_weight += 1.50
+                                best_cost += 1.50
 
-                            if x_next + position[0] == end_point[0] and y_next + position[1] == end_point[1]:
-                                x_tmp = end_point[0]
-                                y_tmp = end_point[1]
-                                break
+                            if h_weight <= curr_weight:
+                                curr_weight = h_weight
+                                if closed_points[x_tmp + position[0]][y_tmp + position[1]] == 0:
+                                    closed_points[x_tmp + position[0]][y_tmp + position[1]] = 1
+                                    tmp_queue.insert(0, (x_tmp + position[0], y_tmp + position[1]))
+                            else:
+                                if closed_points[x_tmp + position[0]][y_tmp + position[1]] == 0:
+                                    closed_points[x_tmp + position[0]][y_tmp + position[1]] = 1
+                                    tmp_queue.append((x_tmp + position[0], y_tmp + position[1]))
 
-                            if path_weight < minimum:
-                                minimum = path_weight
-                                x_tmp = x_next + position[0]
-                                y_tmp = y_next + position[1]
+                for i in range(len(tmp_queue) - 1, -1, -1):
+                    queue_points.insert(0, tmp_queue[i])
 
-                if x_tmp - x_next == 0 or y_tmp - y_next == 0:
-                    best_weight += 1.0
+            if self.area[end_point[0]][end_point[1]] == 0:
+                return -1
 
-                else:
-                    best_weight += 1.50
+            start_point = (end_point[0], end_point[1])
 
-                if best_weight > self.width * self.leng:
-                    return -1
-
-                x_next = x_tmp
-                y_next = y_tmp
-                self.area[x_next][y_next] = "+"
-                robot_paths.append((x_next, y_next))
-            start_point = end_point
-            drawPath(processMaxtrix(robot_paths), color_robot, win, self.width - 1)
-
-        return best_weight
+        return best_cost
 
 
     def dijkstra_search(self, win):
@@ -293,7 +295,6 @@ class World():
 
     def astar_search(self, win):
         positions = [(1, -1), (-1, 0), (-1, -1), (0, -1), (-1, 1), (1, 0), (0, 1), (1, 1)]
-
         start_point = self.robot.get_start_point()
         end_point = self.robot.get_end_point()
         passing_points = []
