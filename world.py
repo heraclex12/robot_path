@@ -384,20 +384,19 @@ class World():
 
     def print_area(self, win):
         start_point = self.robot.get_start_point()
-        self.area[start_point[0]][start_point[1]] = "S"
-        print([start_point[0], start_point[1]])
+        #self.area[start_point[0]][start_point[1]] = "S"
         drawText(start_point[1], start_point[0], self.width-1, win, "S", 20)
         end_point = self.robot.get_end_point()
-        self.area[end_point[0]][end_point[1]] = "G"
+        #self.area[end_point[0]][end_point[1]] = "G"
         drawText(end_point[1], end_point[0], self.width - 1, win, "G", 20)
 
         for i in self.stops:
-            self.area[i[0]][i[1]] = "P"
+            #self.area[i[0]][i[1]] = "P"
             drawText(i[1], i[0], self.width-1, win, "P", 20)
-        for i in range(self.width - 1, -1, -1):
-            for j in range(self.leng):
-                print(self.area[i][j], end=" ")
-            print()
+       # for i in range(self.width - 1, -1, -1):
+           #for j in range(self.leng):
+                #print(self.area[i][j], end=" ")
+           # print()
 
     def moving_polygan(self, polygan : list, step : tuple):
         polygan_path = polygan[:]
@@ -503,6 +502,7 @@ class World():
                 robot_path.append((x_next, y_next))
                 self.area[x_next][y_next] = "+"
                 drawPath(processMaxtrix([(x_next, y_next)]), color_robot, win, self.width - 1)
+                world.print_area(win)
                 time.sleep(0.5)
 
             start_point = end_point
@@ -621,30 +621,34 @@ if __name__ == '__main__':
                 drawPath(processMaxtrix(world.drawing_polygan(polygan)), random_color(), win, height - 1)
             s = world.dijkstra_search(win)
             if s == -1:
-                print("Can't find a way!!!")
+                world.print_area(win)
+                drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
-                print("Cost: " + str(s))
+                drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
         elif task == "greedy":
             for polygan in world.polygans:
                 drawPath(processMaxtrix(world.drawing_polygan(polygan)), random_color(), win, height - 1)
             s = world.greedy_search(win)
             if s == -1:
-                print("Can't find a way!!!")
+                world.print_area(win)
+                drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
-                print("Cost: " + str(s))
+                drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
+
 
         elif task == "astar":
             for polygan in world.polygans:
                 drawPath(processMaxtrix(world.drawing_polygan(polygan)), random_color(), win, height - 1)
             s = world.astar_search(win)
             if s == -1:
-                print("Can't find a way!!!")
+                world.print_area(win)
+                drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
-                print("Cost: " + str(s))
+                drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
         elif task == "moving":
             polygan_borders = []
@@ -657,9 +661,10 @@ if __name__ == '__main__':
             s = world.greedy_search_with_dynamic(polygan_borders, color_robot, win)
             world.print_area(win)
             if s == -1:
-                print("Can't find a way!!!")
+                drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
-                print("Cost: " + str(s))
+                drawText(width//2, height-1, height - 1, win, "Cost: "+str(s), 20)
+
 
         else:
             print("Wrong search name!!!")
