@@ -384,20 +384,19 @@ class World():
 
     def print_area(self, win):
         start_point = self.robot.get_start_point()
-        self.area[start_point[0]][start_point[1]] = "S"
-        print([start_point[0], start_point[1]])
+        #self.area[start_point[0]][start_point[1]] = "S"
         drawText(start_point[1], start_point[0], self.width-1, win, "S", 20)
         end_point = self.robot.get_end_point()
-        self.area[end_point[0]][end_point[1]] = "G"
+        #self.area[end_point[0]][end_point[1]] = "G"
         drawText(end_point[1], end_point[0], self.width - 1, win, "G", 20)
 
         for i in self.stops:
-            self.area[i[0]][i[1]] = "P"
+            #self.area[i[0]][i[1]] = "P"
             drawText(i[1], i[0], self.width-1, win, "P", 20)
-        for i in range(self.width - 1, -1, -1):
-            for j in range(self.leng):
-                print(self.area[i][j], end=" ")
-            print()
+       # for i in range(self.width - 1, -1, -1):
+           #for j in range(self.leng):
+                #print(self.area[i][j], end=" ")
+           # print()
 
     def moving_polygan(self, polygan : list, step : tuple):
         polygan_path = polygan[:]
@@ -503,6 +502,7 @@ class World():
                 robot_path.append((x_next, y_next))
                 self.area[x_next][y_next] = "+"
                 drawPath(processMaxtrix([(x_next, y_next)]), color_robot, win, self.width - 1)
+                world.print_area(win)
                 time.sleep(0.5)
 
             start_point = end_point
