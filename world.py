@@ -206,6 +206,7 @@ class World():
                                 h_weight += 1
                                 best_cost += 1
 
+
                             else:
                                 if self.area[x_tmp][y_tmp + position[1]] != 0 and self.area[x_tmp + position[0]][
                                     y_tmp] != 0:
@@ -213,6 +214,7 @@ class World():
 
                                 h_weight += 1.50
                                 best_cost += 1.50
+
 
                             if h_weight <= curr_weight:
                                 curr_weight = h_weight
@@ -625,6 +627,7 @@ if __name__ == '__main__':
                 drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
+                print("Cost: " + str(s))
                 drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
         elif task == "greedy":
@@ -636,6 +639,7 @@ if __name__ == '__main__':
                 drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
+                print("Cost: " + str(s))
                 drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
 
@@ -648,6 +652,7 @@ if __name__ == '__main__':
                 drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
+                print("Cost: " + str(s))
                 drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
         elif task == "moving":
