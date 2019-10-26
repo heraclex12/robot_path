@@ -176,7 +176,9 @@ class World():
 
         passing_points.extend(self.stops[:])
         passing_points.append(end_point)
-        best_cost = 0
+        best_cost = -1
+        x_tmp = start_point[0]
+        y_tmp = start_point[1]
         area_copy = copy.deepcopy(self.area)
         while passing_points:
             queue_points = []
@@ -187,6 +189,12 @@ class World():
             while queue_points:
                 curr_point = queue_points.pop(0)
                 self.area[curr_point[0]][curr_point[1]] = "+"
+                if curr_point[0] - x_tmp == 0 or curr_point[1] - y_tmp == 0:
+                    best_cost += 1
+
+                else:
+                    best_cost += 1.50
+
                 drawPath(processMaxtrix([(curr_point[0], curr_point[1])]),
                          color_robot, win, self.width - 1)
                 x_tmp = curr_point[0]
@@ -204,7 +212,6 @@ class World():
                                                        end_point[1]), 2)
                             if position[0] == 0 or position[1] == 0:
                                 h_weight += 1
-                                best_cost += 1
 
 
                             else:
@@ -213,7 +220,6 @@ class World():
                                     continue
 
                                 h_weight += 1.50
-                                best_cost += 1.50
 
 
                             if h_weight <= curr_weight:
@@ -627,7 +633,10 @@ if __name__ == '__main__':
                 drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
+<<<<<<< HEAD
                 print("Cost: " + str(s))
+=======
+>>>>>>> 442627ba0a7ca2d33fe18309ac9ce7db09a63c84
                 drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
         elif task == "greedy":
@@ -639,7 +648,10 @@ if __name__ == '__main__':
                 drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
+<<<<<<< HEAD
                 print("Cost: " + str(s))
+=======
+>>>>>>> 442627ba0a7ca2d33fe18309ac9ce7db09a63c84
                 drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
 
@@ -652,7 +664,10 @@ if __name__ == '__main__':
                 drawText(width // 2, height - 1, height - 1, win, "Can't find away!!!", 20)
             else:
                 world.print_area(win)
+<<<<<<< HEAD
                 print("Cost: " + str(s))
+=======
+>>>>>>> 442627ba0a7ca2d33fe18309ac9ce7db09a63c84
                 drawText(width//2, height-1, height - 1, win,"Cost: "+str(s), 20)
 
         elif task == "moving":
